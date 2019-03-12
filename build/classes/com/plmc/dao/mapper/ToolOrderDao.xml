@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现ToolOrderDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.ToolOrderDao">
+
+	<resultMap id="ToolOrderResultMap" type="com.plmc.vo.entity.ToolOrder" >
+
+	    <id column="toolorder_no" property="toolOrderNo" jdbcType="VARCHAR" />
+	    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+	    <result column="tool_no" property="toolNo" jdbcType="VARCHAR" />
+	    <result column="tool_one_num" property="toolOneNum" jdbcType="VARCHAR" />
+	    <result column="tool_real_price" property="toolRealPrice" jdbcType="VARCHAR" />
+	    <result column="toolorder_state" property="toolOrderState" jdbcType="INTEGER" />
+
+  	</resultMap>
+
+    <insert id="insertToolOrder" parameterType="com.plmc.vo.entity.ToolOrder" flushCache="true" >
+	<selectKey keyProperty="toolOrderNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO toolorder_info(toolorder_no, order_no, tool_no, tool_one_num, tool_real_price, toolorder_state)
+        VALUES (#{toolOrderNo}, #{orderNo}, #{toolNo}, #{toolOneNum}, #{toolRealPrice}, #{toolOrderState});
+    </insert>
+
+    <delete id="idDeleteToolOrder" parameterType="java.lang.String" flushCache="true">
+      	delete from toolorder_info where toolorder_no = #{toolOrderNo}  
+    </delete>
+    
+    <update id="updateToolOrder" parameterType="com.plmc.vo.entity.ToolOrder" flushCache="true">
+      	update toolorder_info set 
+      	<if test="orderNo != null and orderNo != ''">
+        	order_no = #{orderNo}, 
+        </if>
+        <if test="toolNo != null and toolNo != ''">
+        	tool_no = #{toolNo}, 
+        </if>  
+        <if test="toolOneNum != null">
+        	tool_one_num = #{toolOneNum}, 
+        </if>
+        <if test="toolRealPrice != null and toolRealPrice != ''">
+        	tool_real_price = #{toolRealPrice}, 
+        </if>
+        <if test="toolOrderState != null and toolOrderState != ''">
+        	toolorder_state = #{toolOrderState}, 
+        </if>
+      	 toolorder_no = #{toolOrderNo} where toolorder_no = #{toolOrderNo}  
+    </update>
+    
+    <select id="idGetToolOrder" parameterType="java.lang.String" resultMap="ToolOrderResultMap">
+      	select toolorder_no, order_no, tool_no, tool_one_num, tool_real_price, toolorder_state from toolorder_info where 1=1
+        	and	toolorder_no = #{toolOrderNo}  
+    </select>
+    
+    <select id="listMapToolOrder" parameterType="java.util.Map" resultType="java.util.Map">
+      	select toolorder_no, order_no, tool_no, tool_one_num, tool_real_price, toolorder_state from toolorder_info where 1=1
+        <if test="orderNo != null and orderNo != ''"> 
+        	and	order_no = #{orderNo} 
+        </if>
+        <if test="toolOrderState != null">
+        	and	toolorder_state = #{toolOrderState} 
+        </if>   
+    </select>
+    
+    <select id="selectListToolOrder" parameterType="java.util.Map" resultMap="ToolOrderResultMap">
+      	select toolorder_no, order_no, tool_no, tool_one_num, tool_real_price, toolorder_state from toolorder_info where 1=1
+      	<if test="toolOrderNo != null and toolOrderNo != ''">
+        	and	toolorder_no = #{toolOrderNo} 
+        </if>
+        <if test="toolOrderState != null">
+        	and	toolorder_state = #{toolOrderState} 
+        </if>   
+        <if test="orderNo != null and orderNo != ''">
+        	and	order_no = #{orderNo} 
+        </if> 
+        <if test="toolNo != null and toolNo != ''">
+        	and	tool_no = #{toolNo} 
+        </if>  
+    </select>
+    
+</mapper>

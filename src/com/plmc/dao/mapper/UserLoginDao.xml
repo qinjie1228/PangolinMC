@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现UserLoginDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.UserLoginDao">
+
+	<resultMap id="UserLoginResultMap" type="com.plmc.vo.util.UserLogin" >
+
+	    <id column="login_no" property="loginNo" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="ip_address" property="ipAddress" jdbcType="VARCHAR" />
+	    <result column="login_state" property="loginState" jdbcType="INTEGER" />
+
+ 	</resultMap>
+
+    <insert id="insertUserLogin" parameterType="com.plmc.vo.util.UserLogin" flushCache="true" >
+	<selectKey keyProperty="loginNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO user_login(login_no, user_no, ip_address, login_state)
+        VALUES (#{loginNo}, #{userNo}, #{ipAddress}, #{loginState});
+    </insert>
+
+    <delete id="idDeleteUserLogin" parameterType="java.lang.String" flushCache="true">
+      	delete from user_login where login_no = #{loginNo}  
+    </delete>
+    
+    <update id="updateUserLogin" parameterType="com.plmc.vo.util.UserLogin" flushCache="true">
+      	update user_login set 
+        <if test="loginState != -1">
+        	login_state = #{loginState}, 
+        </if>
+      	 login_no = #{loginNo} where login_no = #{loginNo}  
+    </update>
+    
+    <update id="recoverUserLogin" flushCache="true">
+      	update user_login set login_state = 0 where <![CDATA[login_state <> 0 ]]>
+    </update>
+    
+    <update id="recoverUserLoginOne" parameterType="java.lang.String" flushCache="true">
+      	update user_login set login_state = 0 where 1=1
+      	and user_no = #{userNo}
+      	and <![CDATA[login_state <> 0 ]]>
+    </update>
+    
+	<select id="listUserLogin" resultMap="UserLoginResultMap">
+      	select login_no, user_no, ip_address, login_state from user_login where 1=1
+    </select>
+    
+    <select id="idGetUserLogin" parameterType="java.lang.String" resultMap="UserLoginResultMap">
+      	login_no, user_no, ip_address, login_state from user_login where 1=1
+        	and	login_no = #{loginNo} 
+    </select>
+    
+    <select id="selectListUserLogin" parameterType="java.util.Map" resultMap="UserLoginResultMap">
+      	select login_no, user_no, ip_address, login_state from user_login where 1=1
+      	<if test="userNo != null and userNo != ''">
+        	and	user_no = #{userNo} 
+        </if>
+        <if test="ipAddress != null and ipAddress != ''">
+        	and	ip_address = #{ipAddress} 
+        </if>
+        <if test="ipAddressOther != null and ipAddressOther != ''">
+        	and	<![CDATA[ip_address <> #{ipAddressOther}]]> 
+        </if>
+        <if test="userNoOther != null and userNoOther != ''">
+        	and	<![CDATA[user_no <> #{userNoOther}]]> 
+        </if>
+        <if test="loginState != null">
+        	and	login_state = #{loginState} 
+        </if>   
+    </select>
+
+</mapper>

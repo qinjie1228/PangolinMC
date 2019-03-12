@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现PostDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.PostDao">
+
+	<resultMap id="PostResultMap" type="com.plmc.vo.entity.Post" >
+
+	    <id column="post_no" property="postNo" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="post_category" property="postCategory" jdbcType="VARCHAR" />
+	    <result column="post_title" property="postTitle" jdbcType="VARCHAR" />
+	    <result column="post_content" property="postContent" jdbcType="VARCHAR" />
+	    <result column="post_pic" property="postPic" jdbcType="VARCHAR" />
+	    <result column="post_pub_time" property="postPubTime" jdbcType="TIMESTAMP" />
+	    <result column="post_scan_num" property="postScanNum" jdbcType="INTEGER" />
+	    <result column="post_comment_num" property="postCommentNum" jdbcType="INTEGER" />
+	    <result column="post_state" property="postState" jdbcType="INTEGER" />
+
+  	</resultMap>
+
+    <insert id="insertPost" parameterType="com.plmc.vo.entity.Post" flushCache="true" >
+	<selectKey keyProperty="postNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO post_info(post_no, user_no, post_category, post_title, post_content, post_pic, post_pub_time, post_scan_num, post_comment_num, post_state)
+        VALUES (#{postNo}, #{userNo}, #{postCategory}, #{postTitle}, #{postContent}, #{postPic}, #{postPubTime}, #{postScanNum}, #{postCommentNum}, #{postState});
+    </insert>
+
+    <delete id="idDeletePost" parameterType="java.lang.String" flushCache="true">
+      	delete from post_info where post_no = #{postNo}  
+    </delete>
+    
+    <update id="updatePost" parameterType="com.plmc.vo.entity.Post" flushCache="true">
+      	update post_info set 
+      	<if test="userNo != null and userNo != ''">
+        	user_no = #{userNo}, 
+        </if>
+        <if test="postCategory != null and postCategory != ''">
+        	post_category = #{postCategory}, 
+        </if>  
+        <if test="postTitle != null and postTitle != ''">
+        	post_title = #{postTitle}, 
+        </if>
+        <if test="postContent != null and postContent != ''">
+        	post_content = #{postContent}, 
+        </if>
+        <if test="postPic != null and postPic != ''">
+        	post_pic = #{postPic}, 
+        </if>
+        <if test="postPubTime != null and postPubTime != ''">
+        	post_pub_time = #{postPubTime}, 
+        </if>
+        <if test="postScanNum != -1">
+        	post_scan_num = #{postScanNum}, 
+        </if> 
+        <if test="postCommentNum != -1">
+        	post_comment_num = #{postCommentNum}, 
+        </if> 
+        <if test="postState != -1">
+        	post_state = #{postState}, 
+        </if>  
+      	 post_no = #{postNo} where post_no = #{postNo}  
+    </update>
+    
+    <select id="countPost" resultType="java.lang.Integer">
+      	select count(1) from post_info 
+    </select>
+    
+    <select id="pageCountPost" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from post_info p
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+      	where 1 = 1
+      	<if test="postNo != null and postNo != ''">
+        	and p.post_no = #{postNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and p.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and p.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="postCategory != null and postCategory != ''">
+        	and p.post_category = #{postCategory} 
+        </if>  
+        <if test="postTitle != null and postTitle != ''">
+        	and p.post_title like CONCAT('%','${postTitle}','%')
+        </if>
+        <if test="postContent != null and postContent != ''">
+        	and p.post_content like CONCAT('%','${postContent}','%')
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+        	and p.post_pub_time &gt;= #{timeStart} 
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+        	and p.post_pub_time &lt; #{timeEnd} 
+        </if>
+        <if test="postScanNum != null and postScanNum != ''">
+        	and p.post_scan_num &gt;= #{postScanNum} 
+        </if>
+        <if test="postCommentNum != null and postCommentNum != ''">
+        	and p.post_comment_num &gt;= #{postCommentNum} 
+        </if>
+        <if test="postState != null and postState != ''">
+        	and p.post_state = #{postState} 
+        </if>
+        <if test="commonFlag != null and commonFlag != ''">
+        	and (p.post_state = 4 or p.post_state = 1)
+        </if>
+        <if test="wellChosenFlag != null and wellChosenFlag != ''">
+        	and (p.post_state = 4 or p.post_state = 2)
+        </if>
+    </select>
+    
+    <select id="listPost" parameterType="java.util.Map" resultMap="PostResultMap">
+      	select post_no, user_no, post_category, post_title, post_content, post_pic, post_pub_time, post_scan_num, post_comment_num, post_state
+      	from post_info 
+    </select>
+    
+    <select id="pagePost" parameterType="java.util.Map" resultMap="PostResultMap">
+      	select p.post_no, p.user_no, p.post_category, p.post_title, p.post_content, p.post_pic, p.post_pub_time, p.post_scan_num, p.post_comment_num, p.post_state 
+      	from post_info p
+      	<if test="userName != null and userName != ''">
+        	, user_info u
+        </if>
+      	where 1 = 1
+      	<if test="postNo != null and postNo != ''">
+        	and p.post_no = #{postNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and p.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and p.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="postCategory != null and postCategory != ''">
+        	and p.post_category = #{postCategory} 
+        </if>  
+        <if test="postTitle != null and postTitle != ''">
+        	and p.post_title like CONCAT('%','${postTitle}','%')
+        </if>
+        <if test="postContent != null and postContent != ''">
+        	and p.post_content like CONCAT('%','${postContent}','%')
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+        	and p.post_pub_time &gt;= #{timeStart} 
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+        	and p.post_pub_time &lt; #{timeEnd} 
+        </if>
+        <if test="postScanNum != null and postScanNum != ''">
+        	and p.post_scan_num &gt;= #{postScanNum} 
+        </if>
+        <if test="postCommentNum != null and postCommentNum != ''">
+        	and p.post_comment_num &gt;= #{postCommentNum} 
+        </if>
+        <if test="postState != null and postState != ''">
+        	and p.post_state = #{postState} 
+        </if>
+        <if test="commonFlag != null and commonFlag != ''">
+        	and (p.post_state = 4 or p.post_state = 1) order by p.post_pub_time DESC
+        </if>
+        <if test="wellChosenFlag != null and wellChosenFlag != ''">
+        	and (p.post_state = 4 or p.post_state = 2) order by p.post_scan_num DESC
+        </if>
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetPost" parameterType="java.lang.String" resultMap="PostResultMap">
+      	select post_no, user_no, post_category, post_title, post_content, post_pic, post_pub_time, post_scan_num, post_comment_num, post_state from post_info where 1=1
+        	and	post_no = #{postNo} 
+    </select>
+    
+    <select id="listMapPost" parameterType="java.util.Map" resultType="java.util.Map">
+      	select post_no, user_no, post_category, post_title, post_content, post_pic, post_pub_time, post_scan_num, post_comment_num, post_state from post_info where 1=1
+        <if test="postNo != null and postNo != ''"> 
+        	and	post_no = #{postNo} 
+        </if>
+        <if test="postState != null and postState != ''">
+        	and	post_state = #{postState} 
+        </if>   
+    </select>
+    
+    <select id="selectListPost" parameterType="java.util.Map" resultMap="PostResultMap">
+      	select post_no, user_no, post_category, post_title, post_content, post_pic, post_pub_time, post_scan_num, post_comment_num, post_state from post_info where 1=1
+      	<if test="postState != null and postState != ''">
+        	and	post_state = #{postState} 
+        </if> 
+        <if test="userNo != null and userNo != ''">
+        	and	user_no = #{userNo} 
+        </if>    
+        <if test="numOrder != null and numOrder != ''"> 
+        	<![CDATA[and post_state < 5 ]]> order by post_scan_num DESC, post_comment_num DESC, post_pub_time DESC
+        </if>
+        <if test="pubTimeOrder != null and pubTimeOrder != ''">
+        	<![CDATA[and post_state < 5 ]]> order by post_pub_time DESC
+        </if>   
+        <if test="selectNum != null and selectNum != ''">
+        	limit #{selectNum} 
+        </if>
+    </select>
+    
+</mapper>

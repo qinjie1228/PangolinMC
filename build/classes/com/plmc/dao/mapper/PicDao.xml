@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现PicDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.PicDao">
+
+	<resultMap id="PicResultMap" type="com.plmc.vo.entity.Picture" >
+
+	    <id column="pic_no" property="picNo" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="pic_des" property="picDes" jdbcType="VARCHAR" />
+	    <result column="pic_path" property="picPath" jdbcType="VARCHAR" />
+	    <result column="pic_pub_time" property="picPubTime" jdbcType="TIMESTAMP" />
+	    <result column="pic_state" property="picState" jdbcType="INTEGER" />
+
+  	</resultMap>
+
+    <insert id="insertPicture" parameterType="com.plmc.vo.entity.Picture" flushCache="true" >
+	<selectKey keyProperty="picNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO picture_info(pic_no, user_no, pic_des, pic_path, pic_pub_time, pic_state)
+        VALUES (#{picNo}, #{userNo}, #{picDes}, #{picPath}, #{picPubTime}, #{picState});
+    </insert>
+
+    <delete id="idDeletePicture" parameterType="java.lang.String" flushCache="true">
+      	delete from picture_info where pic_no = #{picNo}  
+    </delete>
+    
+    <update id="updatePicture" parameterType="com.plmc.vo.entity.Picture" flushCache="true">
+      	update picture_info set 
+      	<if test="userNo != null and userNo != ''">
+        	user_no = #{userNo}, 
+        </if>
+        <if test="picDes != null and picDes != ''">
+        	pic_des = #{picDes}, 
+        </if>  
+        <if test="picPath != null and picPath != ''">
+        	pic_path = #{picPath}, 
+        </if>
+        <if test="picPubTime != null and picPubTime != ''">
+        	pic_pub_time = #{picPubTime}, 
+        </if>
+        <if test="picState != -1">
+        	pic_state = #{picState}, 
+        </if>  
+      	 pic_no = #{picNo} where pic_no = #{picNo}  
+    </update>
+    
+    <update id="addToLove" parameterType="java.lang.String" flushCache="true">
+      	update picture_info set pic_islove = 1 where pic_no = ${_parameter}
+    </update>
+    <update id="cancelToLove" parameterType="java.lang.String" flushCache="true">
+      	update picture_info set pic_islove = 0 where pic_no = ${_parameter}
+    </update>
+    
+    <select id="countPicture" resultType="java.lang.Integer">
+      	select count(1) from picture_info 
+    </select>
+    
+    <select id="pageCountPicture" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from picture_info p
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+      	where 1 = 1
+      	<if test="isLove != null">
+        	and	p.pic_islove = #{isLove} and <![CDATA[p.pic_state <> 5 ]]>
+        </if>
+      	<if test="picNo != null and picNo != ''">
+        	and p.pic_no = #{picNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and p.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and p.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="picDes != null and picDes != ''">
+        	and p.pic_des like CONCAT('%','${picDes}','%')
+        </if>  
+        <if test="picPath != null and picPath != ''">
+        	and p.pic_path = #{picPath} 
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+        	and p.pic_pub_time &gt;= #{timeStart} 
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+        	and p.pic_pub_time &lt; #{timeEnd} 
+        </if>
+        <if test="picState != null and picState != ''">
+        	and p.pic_state = #{picState} 
+        </if>
+    </select>
+    
+    <select id="listPicture" parameterType="java.util.Map" resultMap="PicResultMap">
+      	select pic_no, user_no, pic_des, pic_path, pic_pub_time, pic_state
+      	from picture_info 
+    </select>
+    
+    <select id="pagePicture" parameterType="java.util.Map" resultMap="PicResultMap">
+      	select p.pic_no, p.user_no, p.pic_des, p.pic_path, p.pic_pub_time, p.pic_state
+      	from picture_info p
+      	<if test="userName != null and userName != ''">
+        	, user_info u
+        </if>
+      	where 1 = 1
+      	<if test="isLove != null">
+        	and	p.pic_islove = #{isLove} and <![CDATA[p.pic_state <> 5 ]]>
+        </if>  
+      	<if test="picNo != null and picNo != ''">
+        	and p.pic_no = #{picNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and p.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and p.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="picDes != null and picDes != ''">
+        	and p.pic_des like CONCAT('%','${picDes}','%')
+        </if>  
+        <if test="picPath != null and picPath != ''">
+        	and p.pic_path = #{picPath} 
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+        	and p.pic_pub_time &gt;= #{timeStart} 
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+        	and p.pic_pub_time &lt; #{timeEnd} 
+        </if>
+        <if test="picState != null and picState != ''">
+        	and p.pic_state = #{picState} 
+        </if>
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetPicture" parameterType="java.lang.String" resultMap="PicResultMap">
+      	select pic_no, user_no, pic_des, pic_path, pic_pub_time, pic_state from picture_info where 1=1
+        	and	pic_no = #{picNo} 
+    </select>
+    
+    <select id="listMapPicture" parameterType="java.util.Map" resultType="java.util.Map">
+      	select pic_no, user_no, pic_des, pic_path, pic_pub_time, pic_state from picture_info where 1=1
+        <if test="picNo != null and picNo != ''"> 
+        	and	pic_no = #{picNo} 
+        </if>
+        <if test="picState != null and picState != ''">
+        	and	pic_state = #{picState} 
+        </if>   
+    </select>
+    
+    <select id="selectListPicture" parameterType="java.util.Map" resultMap="PicResultMap">
+      	select pic_no, user_no, pic_des, pic_path, pic_pub_time, pic_state from picture_info where 1=1
+      	<if test="picState != null">
+        	and	pic_state = #{picState} 
+        </if> 
+        <if test="isLove != null">
+        	and	pic_islove = #{isLove} and <![CDATA[pic_state <> 5 ]]>
+        </if>  
+        <if test="userNo != null and userNo != ''">
+        	and	user_no = #{userNo} 
+        </if>   
+        <if test="pubTimeOrder != null and pubTimeOrder != ''">
+        	order by pic_pub_time DESC
+        </if>   
+        <if test="selectNum != null and selectNum != ''">
+        	limit #{selectNum} 
+        </if>
+    </select>
+    
+</mapper>

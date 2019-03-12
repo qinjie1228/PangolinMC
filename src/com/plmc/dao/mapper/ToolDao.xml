@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现ToolDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.ToolDao">
+
+	<resultMap id="ToolResultMap" type="com.plmc.vo.entity.Tool" >
+
+	    <id column="tool_no" property="toolNo" jdbcType="VARCHAR" />
+	    <result column="tool_name" property="toolName" jdbcType="VARCHAR" />
+	    <result column="tool_des" property="toolDes" jdbcType="VARCHAR" />
+	    <result column="tool_num" property="toolNum" jdbcType="INTEGER" />
+	    <result column="tool_price" property="toolPrice" jdbcType="DOUBLE" />
+	    <result column="tool_pic" property="toolPic" jdbcType="INTEGER" />
+	    <result column="tool_pub_time" property="toolPubTime" jdbcType="TIMESTAMP" />
+	    <result column="tool_state" property="toolState" jdbcType="INTEGER" />
+	    <result column="version" property="version" jdbcType="INTEGER" />
+
+  	</resultMap>
+
+    <insert id="insertTool" parameterType="com.plmc.vo.entity.Tool" flushCache="true" >
+	<selectKey keyProperty="toolNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO tool_info(tool_no, tool_name, tool_des, tool_num, tool_price, tool_pic, tool_pub_time, tool_state)
+        VALUES (#{toolNo}, #{toolName}, #{toolDes}, #{toolNum}, #{toolPrice}, #{toolPic}, #{toolPubTime}, #{toolState});
+    </insert>
+
+    <delete id="idDeleteTool" parameterType="java.lang.String" flushCache="true">
+      	delete from tool_info where tool_no = #{toolNo}  
+    </delete>
+    
+    <update id="updateTool" parameterType="com.plmc.vo.entity.Tool" flushCache="true">
+      	update tool_info set 
+      	<if test="toolName != null and toolName != ''">
+        	tool_name = #{toolName}, 
+        </if>
+        <if test="toolDes != null and toolDes != ''">
+        	tool_des = #{toolDes}, 
+        </if>  
+        <if test="toolNum != -1">
+        	tool_num = #{toolNum},
+        	version = #{version} + 1, 
+        </if>  
+        <if test="toolPrice != -1">
+        	tool_price = #{toolPrice}, 
+        </if>
+        <if test="toolPic != null and toolPic != ''">
+        	tool_pic = #{toolPic}, 
+        </if>
+        <if test="toolPubTime != null and toolPubTime != ''">
+        	tool_pub_time = #{toolPubTime}, 
+        </if>
+        <if test="toolState != -1">
+        	tool_state = #{toolState}, 
+        </if>  
+      	 	tool_no = #{toolNo} where tool_no = #{toolNo} 
+      	<if test="toolNum != -1">
+        	and version = #{version}
+        </if>    
+    </update>
+    
+    <select id="countTool" resultType="java.lang.Integer">
+      	select count(1) from tool_info 
+    </select>
+    
+    <select id="pageCountTool" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from tool_info 
+      	where 1 = 1
+		<if test="toolName != null and toolName != ''">
+        	and tool_name like CONCAT('%','${toolName}','%') 
+        </if>
+        <if test="toolDes != null and toolDes != ''">
+        	and tool_des like CONCAT('%','${toolDes}','%') 
+        </if>  
+        <if test="toolNum != null and toolNum != ''">
+        	and tool_num &gt;= #{toolNum} 
+        </if>  
+        <if test="priceStart != null and priceStart != ''">
+        	and tool_price &gt;= #{priceStart} 
+        </if>
+        <if test="priceEnd != null and priceEnd != ''">
+        	and tool_price &lt; #{priceEnd} 
+        </if>
+        <if test="toolPic != null and toolPic != ''">
+        	and tool_pic = #{toolPic} 
+        </if>
+        <if test="timeBefore != null and timeBefore != ''">
+        	and tool_pub_time &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and tool_pub_time &lt; #{timeAfter} 
+        </if>
+        <if test="toolState != null and toolState != ''">
+        	and tool_state = #{toolState}
+        </if>  
+    </select>
+    
+    <select id="listTool" parameterType="java.util.Map" resultMap="ToolResultMap">
+      	select tool_no, tool_name, tool_des, tool_num, tool_price, tool_pic, tool_pub_time, tool_state, version
+      	from tool_info 
+    </select>
+    
+    <select id="pageTool" parameterType="java.util.Map" resultMap="ToolResultMap">
+      	select tool_no, tool_name, tool_des, tool_num, tool_price, tool_pic, tool_pub_time, tool_state, version
+      	from tool_info where 1 = 1
+      	<if test="toolName != null and toolName != ''">
+        	and tool_name like CONCAT('%','${toolName}','%') 
+        </if>
+        <if test="toolDes != null and toolDes != ''">
+        	and tool_des like CONCAT('%','${toolDes}','%') 
+        </if>  
+        <if test="toolNum != null and toolNum != ''">
+        	and tool_num &gt;= #{toolNum} 
+        </if>  
+        <if test="priceStart != null and priceStart != ''">
+        	and tool_price &gt;= #{priceStart} 
+        </if>
+        <if test="priceEnd != null and priceEnd != ''">
+        	and tool_price &lt; #{priceEnd} 
+        </if>
+        <if test="toolPic != null and toolPic != ''">
+        	and tool_pic = #{toolPic} 
+        </if>
+        <if test="timeBefore != null and timeBefore != ''">
+        	and tool_pub_time &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and tool_pub_time &lt; #{timeAfter} 
+        </if>
+        <if test="toolState != null and toolState != ''">
+        	and tool_state = #{toolState}
+        </if>  
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetTool" parameterType="java.lang.String" resultMap="ToolResultMap">
+      	select tool_no, tool_name, tool_des, tool_num, tool_price, tool_pic, tool_pub_time, tool_state, version from tool_info where 1=1
+        	and	tool_no = #{toolNo} 
+    </select>
+    
+    <select id="listMapTool" parameterType="java.util.Map" resultType="java.util.Map">
+      	select tool_no, tool_name, tool_des, tool_num, tool_price, tool_pic, tool_pub_time, tool_state, version from tool_info where 1=1
+        <if test="toolNo != null and toolNo != ''"> 
+        	and	tool_no = #{toolNo} 
+        </if>
+        <if test="toolState != null and toolState != ''">
+        	and	tool_state = #{toolState} 
+        </if>   
+    </select>
+    
+    <select id="selectListTool" parameterType="java.util.Map" resultMap="ToolResultMap">
+      	select tool_no, tool_name, tool_des, tool_num, tool_price, tool_pic, tool_pub_time, tool_state, version from tool_info where 1=1
+      	<if test="toolNo != null and toolNo != ''">
+        	and	tool_no = #{toolNo} 
+        </if> 
+      	<if test="toolState != null and toolState != ''">
+        	and	tool_state = #{toolState} 
+        </if>   
+        <if test="numOrder != null and numOrder != ''"> 
+        	order by tool_num DESC
+        </if>
+        <if test="pubTimeOrder != null and pubTimeOrder != ''">
+        	order by tool_pub_time DESC
+        </if>   
+        <if test="selectNum != null and selectNum != ''">
+        	limit #{selectNum} 
+        </if>
+    </select>
+    
+</mapper>

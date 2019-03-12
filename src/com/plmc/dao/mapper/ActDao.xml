@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现ActDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.ActDao">
+
+	<resultMap id="ActResultMap" type="com.plmc.vo.entity.Act" >
+
+	    <id column="act_no" property="actNo" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="act_title" property="actTitle" jdbcType="VARCHAR" />
+	    <result column="act_content" property="actContent" jdbcType="VARCHAR" />
+	    <result column="act_pic" property="actPic" jdbcType="VARCHAR" />
+	    <result column="act_num" property="actNum" jdbcType="INTEGER" />
+	    <result column="act_pub_time" property="actPubTime" jdbcType="TIMESTAMP" />
+	    <result column="act_state" property="actState" jdbcType="INTEGER" />
+
+  	</resultMap>
+
+    <insert id="insertAct" parameterType="com.plmc.vo.entity.Act" flushCache="true" >
+	<selectKey keyProperty="actNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO activity_info(act_no, user_no, act_title, act_content, act_pic, act_num, act_pub_time, act_state)
+        VALUES (#{actNo}, #{userNo}, #{actTitle}, #{actContent}, #{actPic}, #{actNum}, #{actPubTime}, #{actState});
+    </insert>
+
+    <delete id="idDeleteAct" parameterType="java.lang.String" flushCache="true">
+      	delete from activity_info where act_no = #{actNo}  
+    </delete>
+    
+    <update id="updateAct" parameterType="com.plmc.vo.entity.Act" flushCache="true">
+      	update activity_info set 
+      	<if test="userNo != null and userNo != ''">
+        	user_no = #{userNo}, 
+        </if>
+        <if test="actTitle != null and actTitle != ''">
+        	act_title = #{actTitle}, 
+        </if>  
+        <if test="actContent != null and actContent != ''">
+        	act_content = #{actContent}, 
+        </if>
+        <if test="actPic != null and actPic != ''">
+        	act_pic = #{actPic}, 
+        </if>
+        <if test="actNum != -1">
+        	act_num = #{actNum}, 
+        </if>  
+        <if test="actPubTime != null and actPubTime != ''">
+        	act_pub_time = #{actPubTime}, 
+        </if>
+        <if test="actState != -1">
+        	act_state = #{actState}, 
+        </if>  
+      	 act_no = #{actNo} where act_no = #{actNo}  
+    </update>
+    
+    <select id="countAct" resultType="java.lang.Integer">
+      	select count(1) from activity_info 
+    </select>
+    
+    <select id="pageCountAct" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from activity_info a
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+      	where 1 = 1
+      	<if test="actNo != null and actNo != ''">
+        	and a.act_no = #{actNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and a.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and a.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="actTitle != null and actTitle != ''">
+        	and a.act_title like CONCAT('%','${actTitle}','%') 
+        </if>  
+        <if test="actContent != null and actContent != ''">
+        	and a.act_content like CONCAT('%','${actContent}','%')
+        </if>
+        <if test="actPic != null and actPic != ''">
+        	and a.act_pic = #{actPic}
+        </if>
+        <if test="actNum != null and actNum != ''">
+        	and a.act_num &gt;= #{actNum} 
+        </if>  
+        <if test="timeBefore != null and timeBefore != ''">
+        	and a.user_reg_time &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and a.user_reg_time &lt; #{timeAfter} 
+        </if>
+        <if test="actState != null and actState != ''">
+        	and a.act_state = #{actState} 
+        </if>
+    </select>
+    
+    <select id="listAct" parameterType="java.util.Map" resultMap="ActResultMap">
+      	select act_no, user_no, act_title, act_content, act_pic, act_num, act_pub_time, act_state 
+      	from activity_info 
+    </select>
+    
+    <select id="pageAct" parameterType="java.util.Map" resultMap="ActResultMap">
+      	select a.act_no, a.user_no, a.act_title, a.act_content, a.act_pic, a.act_num, a.act_pub_time, a.act_state 
+      	from activity_info a
+      	<if test="userName != null and userName != ''">
+        	, user_info u
+        </if>
+      	where 1 = 1
+      	<if test="actNo != null and actNo != ''">
+        	and a.act_no = #{actNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and a.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and a.user_no = u.user_no and u.user_name = #{userName}  
+        </if>
+        <if test="actTitle != null and actTitle != ''">
+        	and a.act_title like CONCAT('%','${actTitle}','%') 
+        </if>  
+        <if test="actContent != null and actContent != ''">
+        	and a.act_content like CONCAT('%','${actContent}','%')
+        </if>
+        <if test="actPic != null and actPic != ''">
+        	and a.act_pic = #{actPic}
+        </if>
+        <if test="actNum != null and actNum != ''">
+        	and a.act_num &gt;= #{actNum} 
+        </if>  
+        <if test="timeBefore != null and timeBefore != ''">
+        	and a.act_pub_time &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and a.act_pub_time &lt; #{timeAfter} 
+        </if>
+        <if test="actState != null and actState != ''">
+        	and a.act_state = #{actState} 
+        </if>
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetAct" parameterType="java.lang.String" resultMap="ActResultMap">
+      	select act_no, user_no, act_title, act_content, act_pic, act_num, act_pub_time, act_state from activity_info where 1=1
+        	and	act_no = #{actNo} 
+    </select>
+    
+    <select id="listMapAct" parameterType="java.util.Map" resultType="java.util.Map">
+      	select act_no, user_no, act_title, act_content, act_pic, act_num, act_pub_time, act_state from activity_info where 1=1
+        <if test="actNo != null and actNo != ''"> 
+        	and	act_no = #{actNo} 
+        </if>
+        <if test="actState != null and actState != ''">
+        	and	act_state = #{actState} 
+        </if>   
+    </select>
+    
+    <select id="selectListAct" parameterType="java.util.Map" resultMap="ActResultMap">
+      	select act_no, user_no, act_title, act_content, act_pic, act_num, act_pub_time, act_state from activity_info where 1=1
+      	<if test="userNo != null and userNo != ''">
+        	and	user_no = #{userNo} 
+        </if>  
+      	<if test="actState != null">
+        	and	act_state = #{actState} 
+        </if>   
+        <if test="numOrder != null and numOrder != ''"> 
+        	order by act_num DESC
+        </if>
+        <if test="pubTimeOrder != null and pubTimeOrder != ''">
+        	order by act_pub_time DESC
+        </if>   
+        <if test="selectNum != null and selectNum != ''">
+        	limit #{selectNum} 
+        </if>
+    </select>
+    
+</mapper>

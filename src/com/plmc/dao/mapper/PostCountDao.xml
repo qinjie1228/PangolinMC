@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现PostCountDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.PostCountDao">
+
+	<resultMap id="PostCountResultMap" type="com.plmc.vo.util.PostCount" >
+
+	    <id column="post_count_no" property="postCountNo" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="post_no" property="postNo" jdbcType="VARCHAR" />
+	    <result column="ip_address" property="ipAddress" jdbcType="VARCHAR" />
+
+ 	</resultMap>
+
+    <insert id="insertPostCount" parameterType="com.plmc.vo.util.PostCount" flushCache="true" >
+	<selectKey keyProperty="postCountNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO post_count(post_count_no, user_no, post_no, ip_address)
+        VALUES (#{postCountNo}, #{userNo}, #{postNo}, #{ipAddress});
+    </insert>
+
+    <select id="selectListPostCount" parameterType="java.util.Map" resultMap="PostCountResultMap">
+      	select post_count_no, user_no, post_no, ip_address from post_count where 1=1
+      	<if test="userNo != null and userNo != ''">
+        	and	user_no = #{userNo} 
+        </if>
+        <if test="ipAddress != null and ipAddress != ''">
+        	and	ip_address = #{ipAddress} 
+        </if>
+        <if test="postNo != null and postNo != ''">
+        	and	post_no = #{postNo} 
+        </if>   
+    </select>
+
+</mapper>

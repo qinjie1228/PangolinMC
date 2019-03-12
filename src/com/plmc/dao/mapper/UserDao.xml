@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现UserDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.UserDao">
+
+	<resultMap id="UserResultMap" type="com.plmc.vo.entity.User" >
+
+	    <id column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+	    <result column="user_pwd" property="userPwd" jdbcType="VARCHAR" />
+	    <result column="user_real_name" property="userRealName" jdbcType="VARCHAR" />
+	    <result column="user_age" property="userAge" jdbcType="INTEGER" />
+	    <result column="user_sex" property="userSex" jdbcType="INTEGER" />
+	    <result column="user_address" property="userAddress" jdbcType="VARCHAR" />
+	    <result column="user_email" property="userEmail" jdbcType="VARCHAR" />
+	    <result column="user_pic" property="userPic" jdbcType="VARCHAR" />
+	    <result column="user_reg_time" property="userRegTime" jdbcType="TIMESTAMP" />
+	    <result column="user_state" property="userState" jdbcType="INTEGER" />
+
+ 	</resultMap>
+
+    <insert id="insertUser" parameterType="com.plmc.vo.entity.User" flushCache="true" >
+	<selectKey keyProperty="userNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO user_info(user_no, user_name, user_pwd, user_real_name, user_age, user_sex, user_address, user_email, user_pic, user_reg_time, user_state)
+        VALUES (#{userNo}, #{userName}, #{userPwd}, #{userRealName}, #{userAge}, #{userSex}, #{userAddress}, #{userEmail}, #{userPic}, #{userRegTime}, #{userState});
+    </insert>
+
+    <delete id="idDeleteUser" parameterType="java.lang.String" flushCache="true">
+      	delete from user_info where user_no = #{userNo}  
+    </delete>
+    
+    <update id="updateUser" parameterType="com.plmc.vo.entity.User" flushCache="true">
+      	update user_info set 
+      	<if test="userName != null and userName != ''">
+        	user_name = #{userName}, 
+        </if>
+        <if test="userPwd != null and userPwd != ''">
+        	user_pwd = #{userPwd}, 
+        </if>  
+        <if test="userRealName != null and userRealName != ''">
+        	user_real_name = #{userRealName}, 
+        </if>
+        <if test="userAge != -1">
+        	user_age = #{userAge}, 
+        </if>  
+        <if test="userSex != -1">
+        	user_sex = #{userSex}, 
+        </if>
+        <if test="userAddress != null and userAddress != ''">
+        	user_address = #{userAddress}, 
+        </if>  
+        <if test="userEmail != null and userEmail != ''">
+        	user_email = #{userEmail}, 
+        </if>
+        <if test="userPic != null and userPic != ''">
+        	user_pic = #{userPic}, 
+        </if>  
+        <if test="userRegTime != null and userRegTime != ''">
+        	user_reg_time = #{userRegTime}, 
+        </if>
+        <if test="userState != -1 ">
+        	user_state = #{userState}, 
+        </if>  
+      	 user_no = #{userNo} where user_no = #{userNo}  
+    </update>
+    
+	<select id="listUser" resultMap="UserResultMap">
+      	select user_no, user_name, user_pwd, user_real_name, user_age, user_sex, user_address, user_email, user_pic, user_reg_time, user_state from user_info where 1=1
+    </select>
+    
+    <select id="countUser" resultType="java.lang.Integer">
+      	select count(1) from user_info 
+    </select>
+    
+    <select id="pageCountUser" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from user_info where 1 = 1
+      	<if test="userNo != null and userNo != ''">
+        	and user_no = #{userNo} 
+        </if>
+      	<if test="userName != null and userName != ''">
+        	and user_name = #{userName} 
+        </if>
+        <if test="userPwd != null and userPwd != ''">
+        	and user_pwd = #{userPwd} 
+        </if>  
+        <if test="userRealName != null and userRealName != ''">
+        	and user_real_name like CONCAT('%','${userRealName}','%')
+        </if>
+        <if test="userAge != null">
+        	and user_age = #{userAge} 
+        </if>  
+        <if test="userSex != null">
+        	and user_sex = #{userSex} 
+        </if>
+        <if test="userAddress != null and userAddress != ''">
+        	and user_address like CONCAT('%','${userAddress}','%')
+        </if>  
+        <if test="userEmail != null and userEmail != ''">
+        	and user_email = #{userEmail} 
+        </if>
+        <if test="userPic != null and userPic != ''">
+        	and user_pic = #{userPic} 
+        </if>  
+        <if test="timeBefore != null and timeBefore != ''">
+        	and user_reg_time &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and user_reg_time &lt; #{timeAfter} 
+        </if>
+        <if test="userState != null">
+        	and user_state = #{userState} 
+        </if>
+    </select>
+    
+    <select id="pageUser" parameterType="java.util.Map" resultMap="UserResultMap">
+      	select user_no, user_name, user_pwd, user_real_name, user_age, user_sex, user_address, user_email, user_pic, user_reg_time, user_state 
+      	from user_info where 1 = 1
+      	<if test="userNo != null and userNo != ''">
+        	and user_no = #{userNo} 
+        </if>
+      	<if test="userName != null and userName != ''">
+        	and user_name = #{userName} 
+        </if>
+        <if test="userPwd != null and userPwd != ''">
+        	and user_pwd = #{userPwd} 
+        </if>  
+        <if test="userRealName != null and userRealName != ''">
+        	and user_real_name like CONCAT('%','${userRealName}','%')
+        </if>
+        <if test="userAge != null">
+        	and user_age = #{userAge} 
+        </if>  
+        <if test="userSex != null">
+        	and user_sex = #{userSex} 
+        </if>
+        <if test="userAddress != null and userAddress != ''">
+        	and user_address like CONCAT('%','${userAddress}','%')
+        </if>  
+        <if test="userEmail != null and userEmail != ''">
+        	and user_email = #{userEmail} 
+        </if>
+        <if test="userPic != null and userPic != ''">
+        	and user_pic = #{userPic} 
+        </if>  
+        <if test="timeBefore != null and timeBefore != ''">
+        	and user_reg_time &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and user_reg_time &lt; #{timeAfter} 
+        </if>
+        <if test="userState != null">
+        	and user_state = #{userState} 
+        </if>
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetUser" parameterType="java.lang.String" resultMap="UserResultMap">
+      	select user_no, user_name, user_pwd, user_real_name, user_age, user_sex, user_address, user_email, user_pic, user_reg_time, user_state from user_info where 1=1
+        	and	user_no = #{userNo} 
+    </select>
+    
+    <select id="getUserNameByUserNo" parameterType="java.lang.String" resultType="java.lang.String">
+      	select user_name from user_info where user_no = #{userNo} 
+    </select>
+    
+    <select id="listMapUser" parameterType="java.util.Map" resultType="java.util.Map">
+      	select user_no, user_name, user_pwd, user_real_name, user_age, user_sex, user_address, user_email, user_pic, user_reg_time, user_state from user_info where 1=1
+        <if test="userNo != null and userNo != ''"> 
+        	and	user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''"> 
+        	and	user_name = #{userName} 
+        </if>
+        <if test="userState != null and userState != ''">
+        	and	user_state = #{userState} 
+        </if>   
+    </select>
+    
+    <select id="selectListUser" parameterType="java.util.Map" resultMap="UserResultMap">
+      	select user_no, user_name, user_pwd, user_real_name, user_age, user_sex, user_address, user_email, user_pic, user_reg_time, user_state from user_info where 1=1
+      	<if test="userName != null and userName != ''">
+        	and	user_name = #{userName} 
+        </if>   
+    </select>
+
+</mapper>

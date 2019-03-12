@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC  
+    "-//mybatis.org//DTD Config 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">  
+<configuration>  
+    <mappers>  
+        <mapper resource="com/plmc/dao/mapper/UserDao.xml"/> 
+        <mapper resource="com/plmc/dao/mapper/ActDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/MactDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/ToolDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/OrderDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/NoticeDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/PostDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/CommentDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/PicDao.xml"/> 
+        <mapper resource="com/plmc/dao/mapper/UserLoginDao.xml"/>
+        <mapper resource="com/plmc/dao/mapper/PostCountDao.xml"/> 
+    </mappers>  
+</configuration>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现MactDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.MactDao">
+
+	<resultMap id="MactResultMap" type="com.plmc.vo.entity.Mact" >
+
+		<id column="mact_no" property="mactNo" jdbcType="VARCHAR" />
+	    <result column="act_no" property="actNo" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+ 	    <result column="act_res_time" property="actResTime" jdbcType="TIMESTAMP" />
+	    <result column="act_res_state" property="actResState" jdbcType="INTEGER" />
+  	
+  	</resultMap>
+
+    <insert id="insertMact" parameterType="com.plmc.vo.entity.Mact" flushCache="true" > 
+    <selectKey keyProperty="mactNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO mact_info(mact_no, act_no, user_no, act_res_time, act_res_state)
+        VALUES (#{mactNo}, #{actNo}, #{userNo}, #{actResTime}, #{actResState});
+    </insert>
+
+    <delete id="idDeleteMact" parameterType="java.lang.String" flushCache="true">
+      	delete from mact_info where mact_no = #{mactNo}
+    </delete>
+    
+    <update id="updateMact" parameterType="com.plmc.vo.entity.Mact" flushCache="true">
+      	update mact_info set 
+      	<if test="userNo != null and userNo != ''">
+        	user_no = #{userNo}, 
+        </if>
+        <if test="actNo != null and actNo != ''">
+        	act_no = #{actNo}, 
+        </if>
+        <if test="actResTime != null and actResTime != ''">
+        	act_res_time = #{actResTime}, 
+        </if>  
+        <if test="actResState != -1">
+        	act_res_state = #{actResState}, 
+        </if>  
+      	 act_no = #{actNo} where mact_no = #{mactNo}
+    </update>
+    
+    <select id="countMact" resultType="java.lang.Integer">
+      	select count(1) from mact_info 
+    </select>
+    
+    <select id="pageCountMact" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from mact_info m
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+        <if test="actTitle != null and actTitle != ''">
+        	, activity_info a 
+        </if>
+      	where 1 = 1
+      	<if test="mactNo != null and mactNo != ''">
+        	and m.mact_no = #{mactNo} 
+        </if>
+      	<if test="actNo != null and actNo != ''">
+        	and m.act_no = #{actNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and m.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and m.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="actTitle != null and actTitle != ''">
+        	and m.act_no = a.act_no and a.act_title like CONCAT('%','${actTitle}','%') 
+        </if>  
+        <if test="timeBefore != null and timeBefore != ''">
+        	and m.actResTime &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and m.act_res_time &lt; #{timeAfter} 
+        </if>
+        <if test="actResState != null and actResState != ''">
+        	and m.act_res_state = #{actResState} 
+        </if>
+    </select>
+    
+    <select id="listMact" parameterType="java.util.Map" resultMap="MactResultMap">
+      	select act_no, user_no, act_res_time, act_res_state 
+      	from mact_info 
+    </select>
+    
+    <select id="pageMact" parameterType="java.util.Map" resultMap="MactResultMap">
+      	select m.mact_no, m.act_no, m.user_no, m.act_res_time, m.act_res_state from mact_info m
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+        <if test="actTitle != null and actTitle != ''">
+        	, activity_info a 
+        </if>
+      	where 1 = 1
+      	<if test="mactNo != null and mactNo != ''">
+        	and m.mact_no = #{mactNo} 
+        </if>
+      	<if test="actNo != null and actNo != ''">
+        	and m.act_no = #{actNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and m.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and m.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="actTitle != null and actTitle != ''">
+        	and m.act_no = a.act_no and a.act_title like CONCAT('%','${actTitle}','%') 
+        </if>  
+        <if test="timeBefore != null and timeBefore != ''">
+        	and m.actResTime &gt;= #{timeBefore} 
+        </if>
+        <if test="timeAfter != null and timeAfter != ''">
+        	and m.act_res_time &lt; #{timeAfter} 
+        </if>
+        <if test="actResState != null and actResState != ''">
+        	and m.act_res_state = #{actResState} 
+        </if>
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetMact" parameterType="java.lang.String" resultMap="MactResultMap">
+      	select mact_no, act_no, user_no, act_res_time, act_res_state from mact_info
+        where mact_no = #{mactNo}
+    </select>
+    
+    <select id="listMapMact" parameterType="java.util.Map" resultType="java.util.Map">
+      	select mact_no, act_no, user_no, act_res_time, act_res_state from mact_info and 1=1
+        <if test="actNo != null and actNo != ''"> 
+        	and	act_no = #{actNo} 
+        </if>
+        <if test="actResState != null and actResState != ''">
+        	and	act_res_state = #{actResState} 
+        </if>   
+    </select>
+    
+    <select id="selectListMact" parameterType="java.util.Map" resultMap="MactResultMap">
+      	select mact_no, act_no, user_no, act_res_time, act_res_state from mact_info where 1=1
+        <if test="actNo != null and actNo != ''"> 
+        	and act_no = #{actNo} 
+        </if>
+        <if test="userNo != null and userNo != ''"> 
+        	and user_no = #{userNo} 
+        </if>
+        <if test="actResState != null and actResState != ''">
+        	and	act_res_state = #{actResState} 
+        </if>   
+        <if test="resTimeOrder != null and resTimeOrder != ''">
+        	order by act_res_time DESC
+        </if>   
+        <if test="selectNum != null and selectNum != ''">
+        	limit #{selectNum} 
+        </if>
+    </select>
+    
+</mapper>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现OrderDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.OrderDao">
+
+	<resultMap id="OrderResultMap" type="com.plmc.vo.entity.Order" >
+
+	    <id column="order_no" property="orderNo" jdbcType="VARCHAR" />
+	    <result column="order_code" property="orderCode" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="order_make_time" property="orderMakeTime" jdbcType="TIMESTAMP" />
+	    <result column="order_pay_time" property="orderPayTime" jdbcType="TIMESTAMP" />
+	    <result column="order_send_time" property="orderSendTime" jdbcType="TIMESTAMP" />
+	    <result column="order_address" property="orderAddress" jdbcType="VARCHAR" />
+	    <result column="order_price" property="orderPrice" jdbcType="DOUBLE" />
+	    <result column="order_state" property="orderState" jdbcType="INTEGER" />
+
+  	</resultMap>
+
+    <insert id="insertOrder" parameterType="com.plmc.vo.entity.Order" flushCache="true" >
+	<selectKey keyProperty="orderNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO order_info(order_no, order_code, user_no, order_make_time, order_pay_time, order_send_time, order_address, order_price, order_state)
+        VALUES (#{orderNo}, #{orderCode}, #{userNo}, #{orderMakeTime}, #{orderPayTime}, #{orderSendTime}, #{orderAddress}, #{orderPrice}, #{orderState});
+    </insert>
+
+    <delete id="idDeleteOrder" parameterType="java.lang.String" flushCache="true">
+      	delete from order_info where order_no = #{orderNo}  
+    </delete>
+    
+    <update id="updateOrder" parameterType="com.plmc.vo.entity.Order" flushCache="true">
+      	update order_info set 
+      	<if test="orderCode != null and orderCode != ''">
+        	order_code = #{orderCode}, 
+        </if>
+      	<if test="userNo != null and userNo != ''">
+        	user_no = #{userNo}, 
+        </if>
+        <if test="orderMakeTime != null and orderMakeTime != ''">
+        	order_make_time = #{orderMakeTime}, 
+        </if>  
+        <if test="orderPayTime != null and orderPayTime != ''">
+        	order_pay_time = #{orderPayTime}, 
+        </if>
+        <if test="orderSendTime != null and orderSendTime != ''">
+        	order_send_time = #{orderSendTime}, 
+        </if>
+        <if test="orderAddress != null and orderAddress != ''">
+        	order_address = #{orderAddress}, 
+        </if>
+        <if test="orderPrice != -1">
+        	order_price = #{orderPrice}, 
+        </if>  
+        <if test="orderState != -1">
+        	order_state = #{orderState}, 
+        </if>  
+      	 order_no = #{orderNo} where order_no = #{orderNo}  
+    </update>
+    
+    <select id="countOrder" resultType="java.lang.Integer">
+      	select count(1) from order_info 
+    </select>
+    
+    <select id="pageCountOrder" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from order_info o
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+      	where 1 = 1
+      	<if test="orderCode != null and orderCode != ''">
+        	and	o.order_code like CONCAT('%','${orderCode}','%') 
+        </if>
+      	<if test="orderNo != null and orderNo != ''">
+        	and o.order_no = #{orderNo} 
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+        	and o.order_no = #{orderNo} 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and o.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and o.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="makeTimeStart != null and makeTimeStart != ''">
+        	and o.order_make_time &gt;= #{makeTimeStart} 
+        </if>
+        <if test="makeTimeEnd != null and makeTimeEnd != ''">
+        	and o.order_make_time &lt; #{makeTimeEnd} 
+        </if>
+        <if test="payTimeStart != null and payTimeStart != ''">
+        	and o.order_pay_time &gt;= #{payTimeStart} 
+        </if>
+        <if test="payTimeEnd != null and payTimeEnd != ''">
+        	and o.order_pay_time &lt; #{payTimeEnd} 
+        </if>
+        <if test="sendTimeStart != null and sendTimeStart != ''">
+        	and o.order_send_time &gt;= #{sendTimeStart} 
+        </if>
+        <if test="sendTimeEnd != null and sendTimeEnd != ''">
+        	and o.order_send_time &lt; #{sendTimeEnd} 
+        </if>
+        <if test="orderAddress != null and orderAddress != ''">
+        	and o.order_address like CONCAT('%','${orderAddress}','%') 
+        </if>  
+		<if test="priceStart != null and priceStart != ''">
+        	and o.order_price &gt;= #{priceStart} 
+        </if>
+        <if test="priceEnd != null and priceEnd != ''">
+        	and o.order_price &lt; #{priceEnd} 
+        </if>
+        <if test="orderState != null and orderState != ''">
+        	and o.order_state = #{orderState} 
+        </if>
+    </select>
+    
+    <select id="listOrder" parameterType="java.util.Map" resultMap="OrderResultMap">
+      	select order_no, order_code, user_no, order_make_time, order_pay_time, order_send_time, order_address, order_price, order_state
+      	from order_info 
+    </select>
+    
+    <select id="pageOrder" parameterType="java.util.Map" resultMap="OrderResultMap">
+      	select o.order_no, o.order_code, o.user_no, o.order_make_time, o.order_pay_time, o.order_send_time, o.order_address, o.order_price, o.order_state
+      	from order_info o
+      	<if test="userName != null and userName != ''">
+        	, user_info u
+        </if>
+      	where 1 = 1
+      	<if test="orderNo != null and orderNo != ''">
+        	and o.order_no = #{orderNo} 
+        </if>
+        <if test="orderCode != null and orderCode != ''">
+        	and	o.order_code like CONCAT('%','${orderCode}','%') 
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and o.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and o.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="makeTimeStart != null and makeTimeStart != ''">
+        	and o.order_make_time &gt;= #{makeTimeStart} 
+        </if>
+        <if test="makeTimeEnd != null and makeTimeEnd != ''">
+        	and o.order_make_time &lt; #{makeTimeEnd} 
+        </if>
+        <if test="payTimeStart != null and payTimeStart != ''">
+        	and o.order_pay_time &gt;= #{payTimeStart} 
+        </if>
+        <if test="payTimeEnd != null and payTimeEnd != ''">
+        	and o.order_pay_time &lt; #{payTimeEnd} 
+        </if>
+        <if test="sendTimeStart != null and sendTimeStart != ''">
+        	and o.order_send_time &gt;= #{sendTimeStart} 
+        </if>
+        <if test="sendTimeEnd != null and sendTimeEnd != ''">
+        	and o.order_send_time &lt; #{sendTimeEnd} 
+        </if>
+        <if test="orderAddress != null and orderAddress != ''">
+        	and o.order_address like CONCAT('%','${orderAddress}','%') 
+        </if>  
+		<if test="priceStart != null and priceStart != ''">
+        	and o.order_price &gt;= #{priceStart} 
+        </if>
+        <if test="priceEnd != null and priceEnd != ''">
+        	and o.order_price &lt; #{priceEnd} 
+        </if>
+        <if test="orderState != null and orderState != ''">
+        	and o.order_state = #{orderState} 
+        </if>
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetOrder" parameterType="java.lang.String" resultMap="OrderResultMap">
+      	select order_no, order_code, user_no, order_make_time, order_pay_time, order_send_time, order_address, order_price, order_state from order_info where 1=1
+        	and	order_no = #{orderNo} 
+    </select>
+    
+    <select id="listMapOrder" parameterType="java.util.Map" resultType="java.util.Map">
+      	select order_no, order_code, user_no, order_make_time, order_pay_time, order_send_time, order_address, order_price, order_state from order_info where 1=1
+        <if test="userNo != null and userNo != ''"> 
+        	and	user_no = #{userNo} 
+        </if>
+        <if test="orderState != null and orderState != ''">
+        	and	order_state = #{orderState} 
+        </if>   
+    </select>
+    
+    <select id="selectListOrder" parameterType="java.util.Map" resultMap="OrderResultMap">
+      	select o.order_no, o.order_code, o.user_no, o.order_make_time, o.order_pay_time, o.order_send_time, o.order_address, o.order_price, o.order_state from order_info o 
+      	<if test="toolNo != null and toolNo != ''">
+        	left join toolorder_info t on t.order_no = o.order_no 
+        </if>
+      	where 1=1
+      	<if test="orderNo != null and orderNo != ''">
+        	and	o.order_no = #{orderNo} 
+        </if> 
+        <if test="userNo != null and userNo != ''">
+        	and	o.user_no = #{userNo} 
+        </if> 
+        <if test="toolNo != null and toolNo != ''">
+        	and	t.tool_no = #{toolNo} 
+        </if> 
+        <if test="orderCode != null and orderCode != ''">
+        	and	o.order_code like CONCAT('%','${orderCode}','%') 
+        </if> 
+        <if test="orderState != null">
+        	and	o.order_state = #{orderState} 
+        </if>   
+        <if test="orderInCart != null and orderInCart != ''">
+        	and	(o.order_state = 5 or o.order_state = 6)
+        </if>   
+    </select>
+    
+</mapper>

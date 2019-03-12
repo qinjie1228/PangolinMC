@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 实现CommentDao接口对应的方法 -->
+<mapper namespace="com.plmc.dao.CommentDao">
+
+	<resultMap id="CommentResultMap" type="com.plmc.vo.entity.Comment" >
+
+	    <id column="comment_no" property="commentNo" jdbcType="VARCHAR" />
+	    <result column="post_no" property="postNo" jdbcType="VARCHAR" />
+	    <result column="user_no" property="userNo" jdbcType="VARCHAR" />
+	    <result column="comment_content" property="commentContent" jdbcType="VARCHAR" />
+	    <result column="comment_pub_time" property="commentPubTime" jdbcType="TIMESTAMP" />
+	    <result column="comment_state" property="commentState" jdbcType="INTEGER" />
+
+  	</resultMap>
+
+    <insert id="insertComment" parameterType="com.plmc.vo.entity.Comment" flushCache="true" >
+	<selectKey keyProperty="commentNo" resultType="java.lang.String" order="BEFORE">  
+        select  replace(uuid(),'-','')   from dual  
+    </selectKey>  
+        INSERT INTO comment_info(comment_no, post_no, user_no, comment_content, comment_pub_time, comment_state)
+        VALUES (#{commentNo}, #{postNo}, #{userNo}, #{commentContent}, #{commentPubTime}, #{commentState});
+    </insert>
+
+    <delete id="idDeleteComment" parameterType="java.lang.String" flushCache="true">
+      	delete from comment_info where comment_no = #{commentNo}  
+    </delete>
+    
+    <update id="updateComment" parameterType="com.plmc.vo.entity.Comment" flushCache="true">
+      	update comment_info set 
+      	<if test="postNo != null and postNo != ''">
+        	post_no = #{postNo}, 
+        </if>
+      	<if test="userNo != null and userNo != ''">
+        	user_no = #{userNo}, 
+        </if>
+        <if test="commentContent != null and commentContent != ''">
+        	comment_content = #{commentContent}, 
+        </if>
+        <if test="commentPubTime != null and commentPubTime != ''">
+        	comment_pub_time = #{commentPubTime}, 
+        </if>
+        <if test="commentState != -1">
+        	comment_state = #{commentState}, 
+        </if>  
+      	 comment_no = #{commentNo} where comment_no = #{commentNo}  
+    </update>
+    
+    <select id="countComment" resultType="java.lang.Integer">
+      	select count(1) from comment_info 
+    </select>
+    
+    <select id="pageCountComment" parameterType="java.util.Map" resultType="java.lang.Integer">
+      	select count(1) from comment_info c
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+        <if test="postTitle != null and postTitle != ''">
+        	, post_info p 
+        </if>
+      	where 1 = 1
+      	<if test="commentNo != null and commentNo != ''">
+        	and c.comment_no = #{commentNo} 
+        </if>
+      	<if test="postNo != null and postNo != ''">
+        	and c.post_no = #{postNo} 
+        </if>
+        <if test="postTitle != null and postTitle != ''">
+        	and c.post_no = p.post_no and p.post_title like CONCAT('%','${postTitle}','%')
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and c.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and c.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="commentContent != null and commentContent != ''">
+        	and c.comment_content like CONCAT('%','${commentContent}','%')
+        </if>  
+        <if test="timeStart != null and timeStart != ''">
+        	and c.comment_pub_time &gt;= #{timeStart} 
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+        	and c.comment_pub_time &lt; #{timeEnd} 
+        </if>
+        <if test="commentState != null and commentState != ''">
+        	and c.comment_state = #{commentState} 
+        </if>
+    </select>
+    
+    <select id="listComment" parameterType="java.util.Map" resultMap="CommentResultMap">
+      	select comment_no, post_no, user_no, comment_content, comment_pub_time, comment_state
+      	from comment_info 
+    </select>
+    
+    <select id="pageComment" parameterType="java.util.Map" resultMap="CommentResultMap">
+      	select c.comment_no, c.post_no, c.user_no, c.comment_content, c.comment_pub_time, c.comment_state
+      	from comment_info c
+      	<if test="userName != null and userName != ''">
+        	, user_info u 
+        </if>
+        <if test="postTitle != null and postTitle != ''">
+        	, post_info p 
+        </if>
+      	where 1 = 1
+      	<if test="commentNo != null and commentNo != ''">
+        	and c.comment_no = #{commentNo} 
+        </if>
+      	<if test="postNo != null and postNo != ''">
+        	and c.post_no = #{postNo} 
+        </if>
+        <if test="postTitle != null and postTitle != ''">
+        	and c.post_no = p.post_no and p.post_title like CONCAT('%','${postTitle}','%')
+        </if>
+        <if test="userNo != null and userNo != ''">
+        	and c.user_no = #{userNo} 
+        </if>
+        <if test="userName != null and userName != ''">
+        	and c.user_no = u.user_no and u.user_name = #{userName} 
+        </if>
+        <if test="commentContent != null and commentContent != ''">
+        	and c.comment_content like CONCAT('%','${commentContent}','%')
+        </if>  
+        <if test="timeStart != null and timeStart != ''">
+        	and c.comment_pub_time &gt;= #{timeStart} 
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+        	and c.comment_pub_time &lt; #{timeEnd} 
+        </if>
+        <if test="commentState != null and commentState != ''">
+        	and c.comment_state = #{commentState} 
+        </if>
+        	limit #{startNum}, #{endNum} 
+    </select>
+    
+    <select id="idGetComment" parameterType="java.lang.String" resultMap="CommentResultMap">
+      	select comment_no, post_no, user_no, comment_content, comment_pub_time, comment_state from comment_info where 1=1
+        	and	comment_no = #{postNo} 
+    </select>
+    
+    <select id="listMapComment" parameterType="java.util.Map" resultType="java.util.Map">
+      	select comment_no, post_no, user_no, comment_content, comment_pub_time, comment_state from comment_info where 1=1
+        <if test="commentNo != null and commentNo != ''"> 
+        	and	comment_no = #{commentNo} 
+        </if>
+        <if test="commentState != null and commentState != ''">
+        	and	comment_state = #{commentState} 
+        </if>   
+    </select>
+    
+    <select id="selectListComment" parameterType="java.util.Map" resultMap="CommentResultMap">
+      	select comment_no, post_no, user_no, comment_content, comment_pub_time, comment_state from comment_info where 1=1
+      	<if test="postNo != null and postNo != ''">
+        	and	post_no = #{postNo} 
+        </if>   
+        <if test="userNo != null and userNo != ''">
+        	and	user_no = #{userNo} 
+        </if> 
+        <if test="commentState != null">
+        	and	comment_state = #{commentState} 
+        </if>   
+        <if test="pubTimeOrder != null and pubTimeOrder != ''">
+        	order by comment_pub_time DESC
+        </if>   
+        <if test="selectNum != null and selectNum != ''">
+        	limit #{selectNum} 
+        </if>
+    </select>
+    
+</mapper>
